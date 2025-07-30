@@ -380,6 +380,16 @@ class AgentInterface:
                             for chunk in generator:
                                 full_text += chunk.content
                                 total_tokens += 1  # each chunk is a token, let's tally
+
+                                if (
+                                    chunk.response_metadata.get("finish_reason") == "stop"
+                                ):
+                                    interaction_node.set_text_message(message=full_text)
+                                    interaction_node.add_tokens(total_tokens)
+                                    chunk.response_metadata["response"] = (
+                                        interaction_node.export()
+                                    )
+
                                 yield (
                                     "data: "
                                     + json.dumps(
